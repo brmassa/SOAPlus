@@ -2,7 +2,7 @@ name: Tests and Release
 
 on:
     push:
-        branches: [main]
+        branches: ["**"]
     pull_request:
         branches: [main]
 
@@ -35,7 +35,7 @@ jobs:
                   fetch-depth: 0
 
             - name: Semantic Release
-              uses: cycjimmy/semantic-release-action@v3
+              uses: cycjimmy/semantic-release-action@v4
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
@@ -49,7 +49,7 @@ jobs:
                   find . -name "package.json" -type f -exec sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" {} \;
 
             - name: Commit Updated Versions
-              uses: stefanzweifel/git-auto-commit-action@v4
+              uses: stefanzweifel/git-auto-commit-action@v5
               with:
                   commit_message: "chore: update package versions to ${{ env.VERSION }}"
                   file_pattern: "**/package.json"
