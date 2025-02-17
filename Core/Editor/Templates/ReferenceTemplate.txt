@@ -1,0 +1,8 @@
+using UnityEngine;
+using com.brunomassa.soaplus.Core;
+
+namespace com.brunomassa.soaplus
+{
+    [System.Serializable]
+    public class {TYPE}Reference : BaseReference<{TYPE}, {TYPE}Variable> { }
+}

@@ -1,0 +1,8 @@
+using UnityEngine;
+using com.brunomassa.soaplus.Core;
+
+namespace com.brunomassa.soaplus.Builtin
+{
+    [CreateAssetMenu(fileName = "{TYPE}Event", menuName = "SOAPlus/Builtin/{TYPE}Event")]
+    public class {TYPE}Event : BaseEvent<{TYPE}> { }
+}

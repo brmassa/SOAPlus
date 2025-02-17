@@ -1,0 +1,19 @@
+{
+    "name": "com.brunomassa.soaplus.core",
+    "version": "1.0.0",
+    "displayName": "SOAPlus Core",
+    "description": "Core framework for ScriptableObject Architecture Pattern (SOAP) in Unity",
+    "unity": "2021.3",
+    "dependencies": {},
+    "keywords": [
+        "scriptableobject",
+        "architecture",
+        "pattern",
+        "event",
+        "variable"
+    ],
+    "author": {
+        "name": "Bruno Massa",
+        "url": "https://github.com/brmassa"
+    }
+}
