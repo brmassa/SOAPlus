@@ -1,6 +1,6 @@
 {
     "name": "com.brunomassa.soaplus.builtin",
-    "version": "1.0.0",
+    "version": "2025.02.17",
     "displayName": "SOAPlus Builtin",
     "description": "Built-in implementations for SOAPlus Core",
     "unity": "2021.3",
