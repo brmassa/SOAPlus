@@ -58,7 +58,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
@@ -75,6 +75,8 @@ jobs:
               run: |
                   VERSION=${GITHUB_REF#refs/tags/v}
                   find . -name "package.json" -type f -exec sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" {} \;
+                  cat Builtin/package.json
+                  cat Core/package.json
 
     release:
         # needs: test
@@ -83,7 +85,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
               with:
                   fetch-depth: 0
 
