@@ -58,8 +58,8 @@ jobs:
     #           name: Build
     #           path: build
 
-    test-dry-run:
-        name: Test Release (Dry Run)
+    release-dry-run:
+        name: Release (Dry Run)
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -75,11 +75,16 @@ jobs:
               with:
                   node-version: "lts/*"
 
-            # This step will determine the next version
+            # Install dependencies
+            - name: Install semantic-release and plugins
+              run: |
+                  npm install -g semantic-release @semantic-release/exec @semantic-release/git
+
+            # Calculate next version
             - name: Calculate next version
               id: version
               run: |
-                  npx semantic-release --dry-run | tee output.txt
+                  semantic-release --dry-run | tee output.txt
                   VERSION=$(grep "The next release version is" output.txt | sed 's/.*version is //')
                   echo "NEXT_VERSION=${VERSION}" >> $GITHUB_ENV
                   echo "Calculated next version: ${VERSION}"
