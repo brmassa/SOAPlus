@@ -1,80 +1,66 @@
-const fs = require("fs");
-const path = require("path");
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join } from "path";
 
 const version = process.argv[2];
 const notes = process.argv[3];
+
+if (!version) {
+    console.error("No version provided");
+    process.exit(1);
+}
+
+console.log(`Updating files for version ${version}`);
 
 // List of package directories
 const packageDirs = ["Builtin", "Core"];
 const packagePrefix = "com.brunomassa.soaplus";
 
-// Debug function to print file contents
-function debugPrintFile(filepath, label) {
-    console.log(`\n=== ${label} ===`);
-    console.log(`File: ${filepath}`);
-    if (fs.existsSync(filepath)) {
-        console.log(fs.readFileSync(filepath, "utf8"));
-    } else {
-        console.log("File does not exist yet");
-    }
-    console.log("=== End ===\n");
-}
+// Update package.json dependencies and version
+function updatePackageJson(packagePath) {
+    console.log(`Updating ${packagePath}`);
+    const pkg = JSON.parse(readFileSync(packagePath, "utf8"));
 
-// Update package.json dependencies
-function updatePackageDependencies(packagePath) {
-    const pkg = JSON.parse(fs.readFileSync(packagePath, "utf8"));
-    let updated = false;
+    // Update version
+    pkg.version = version;
 
+    // Update dependencies
     if (pkg.dependencies) {
         Object.keys(pkg.dependencies).forEach((dep) => {
             if (dep.startsWith(packagePrefix)) {
                 pkg.dependencies[dep] = version;
-                updated = true;
             }
         });
     }
 
-    if (updated) {
-        fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
-        console.log(`Updated dependencies in ${packagePath}`);
-        debugPrintFile(packagePath, "Updated package.json");
-    }
+    writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");
+    console.log(`Updated ${packagePath}`);
 }
 
-// Update changelogs
-packageDirs.forEach((dir) => {
-    // Update changelog
-    const changelogPath = path.join(dir, "CHANGELOG.md");
+// Update changelog
+function updateChangelog(changelogPath, notes) {
+    console.log(`Updating ${changelogPath}`);
     const date = new Date().toISOString().split("T")[0];
-
-    let changelog = "";
-    if (fs.existsSync(changelogPath)) {
-        changelog = fs.readFileSync(changelogPath, "utf8");
-    }
-
     const newEntry = `# [${version}] - ${date}\n\n${notes}\n\n`;
 
-    fs.writeFileSync(changelogPath, newEntry + changelog);
-    debugPrintFile(changelogPath, `${dir} Changelog`);
+    let existingContent = "";
+    if (existsSync(changelogPath)) {
+        existingContent = readFileSync(changelogPath, "utf8");
+    }
 
+    writeFileSync(changelogPath, newEntry + existingContent);
+    console.log(`Updated ${changelogPath}`);
+}
+
+// Update all packages
+packageDirs.forEach((dir) => {
     // Update package.json
-    const packagePath = path.join(dir, "package.json");
-    updatePackageDependencies(packagePath);
+    const packagePath = join(dir, "package.json");
+    updatePackageJson(packagePath);
+
+    // Update changelog
+    const changelogPath = join(dir, "CHANGELOG.md");
+    updateChangelog(changelogPath, notes);
 });
 
 // Update root changelog
-const rootChangelogPath = "CHANGELOG.md";
-let rootChangelog = "";
-if (fs.existsSync(rootChangelogPath)) {
-    rootChangelog = fs.readFileSync(rootChangelogPath, "utf8");
-}
-const rootEntry = `# [${version}] - ${date}\n\n${notes}\n\n`;
-fs.writeFileSync(rootChangelogPath, rootEntry + rootChangelog);
-debugPrintFile(rootChangelogPath, "Root Changelog");
-
-// Print final summary
-console.log("\n=== Update Summary ===");
-console.log(`Version: ${version}`);
-console.log("Release Notes:");
-console.log(notes);
-console.log("==================\n");
+updateChangelog("CHANGELOG.md", notes);
