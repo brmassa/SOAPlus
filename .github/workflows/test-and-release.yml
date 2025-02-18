@@ -97,17 +97,17 @@ jobs:
                       sed "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" $f
                   done
 
-            - name: Show the changelogs
+            # Optional: Print the contents of changed files after the dry run
+            - name: Show Changed Files
               run: |
-                  # Print the version that would be released
-                  echo "Would release version: ${{ env.NEXT_RELEASE_VERSION }}"
+                  echo "Modified files:"
+                  git status
 
-                  # Show what the package.json files would look like
-                  VERSION=${{ env.NEXT_RELEASE_VERSION }}
-                  for f in $(find . -name "CHANGELOG.md"); do
-                      echo "Would update $f:"
-                      sed "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" $f
-                  done
+                  echo "\nChanges in package.json files:"
+                  git diff **/package.json
+
+                  echo "\nChanges in CHANGELOG.md files:"
+                  git diff **/CHANGELOG.md
 
     release:
         # needs: test
