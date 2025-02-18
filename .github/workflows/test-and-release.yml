@@ -7,51 +7,76 @@ on:
         branches: [main]
 
 jobs:
-    test:
-        name: Run Tests
+    # test:
+    #     name: Run Tests
+    #     runs-on: ubuntu-latest
+    #     steps:
+    #       # Checkout
+    #       - name: Checkout repository
+    #         uses: actions/checkout@v4
+    #         with:
+    #           lfs: true
+
+    #       # Cache
+    #       - uses: actions/cache@v3
+    #         with:
+    #           path: Library
+    #           key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+    #           restore-keys: |
+    #             Library-
+
+    #       # Test
+    #       - name: Run tests
+    #         uses: game-ci/unity-test-runner@v4
+    #         env:
+    #           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+    #           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+    #           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    #           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+    #         with:
+    #           githubToken: ${{ secrets.GITHUB_TOKEN }}
+
+    #       # Build
+    #       - name: Build project
+    #         uses: game-ci/unity-builder@v4
+    #         env:
+    #           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+    #           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+    #           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+    #           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+    #         with:
+    #           targetPlatform: WebGL
+
+    #       # Output
+    #       - uses: actions/upload-artifact@v4
+    #         with:
+    #           name: Build
+    #           path: build
+
+    test-release:
+        needs: test
+        name: Release
         runs-on: ubuntu-latest
+        if: github.ref == 'refs/heads/main'
+
         steps:
-          # Checkout
-          - name: Checkout repository
-            uses: actions/checkout@v4
-            with:
-              lfs: true
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-          # Cache
-          - uses: actions/cache@v3
-            with:
-              path: Library
-              key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-              restore-keys: |
-                Library-
+            - name: Semantic Release
+              uses: cycjimmy/semantic-release-action@v4
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  extra_plugins: |
+                      @semantic-release/exec
+                      @semantic-release/git
 
-          # Test
-          - name: Run tests
-            uses: game-ci/unity-test-runner@v4
-            env:
-              UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-              UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-              UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-              UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-            with:
-              githubToken: ${{ secrets.GITHUB_TOKEN }}
-
-          # Build
-          - name: Build project
-            uses: game-ci/unity-builder@v4
-            env:
-              UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-              UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-              UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-              UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-            with:
-              targetPlatform: WebGL
-
-          # Output
-          - uses: actions/upload-artifact@v4
-            with:
-              name: Build
-              path: build
+            - name: Update Package Versions
+              run: |
+                  VERSION=${GITHUB_REF#refs/tags/v}
+                  find . -name "package.json" -type f -exec sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" {} \;
 
     release:
         needs: test
