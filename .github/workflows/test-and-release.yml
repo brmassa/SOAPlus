@@ -83,6 +83,8 @@ jobs:
             # Calculate next version
             - name: Calculate next version
               id: version
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   semantic-release --dry-run | tee output.txt
                   VERSION=$(grep "The next release version is" output.txt | sed 's/.*version is //')
