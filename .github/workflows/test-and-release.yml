@@ -53,30 +53,35 @@ jobs:
     #           name: Build
     #           path: build
 
-    test-release:
-        name: Release
-        runs-on: ubuntu-latest
+    test-dry-run:
+      name: Test Release (Dry Run)
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@v4
+            with:
+                fetch-depth: 0
 
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+          - name: Semantic Release Dry Run
+            uses: cycjimmy/semantic-release-action@v4
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+                dry_run: true
+                extra_plugins: |
+                    @semantic-release/exec
+                    @semantic-release/git
 
-            - name: Semantic Release
-              uses: cycjimmy/semantic-release-action@v4
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  extra_plugins: |
-                      @semantic-release/exec
-                      @semantic-release/git
-
-            - name: Update Package Versions
-              run: |
-                  VERSION=${GITHUB_REF#refs/tags/v}
-                  find . -name "package.json" -type f -exec sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" {} \;
-                  cat Builtin/package.json
-                  cat Core/package.json
+          - name: Show what would change
+            run: |
+                # Print the version that would be released
+                echo "Would release version: ${{ env.NEXT_RELEASE_VERSION }}"
+                
+                # Show what the package.json files would look like
+                VERSION=${{ env.NEXT_RELEASE_VERSION }}
+                for f in $(find . -name "package.json"); do
+                    echo "Would update $f:"
+                    sed "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" $f
+                done
 
     release:
         # needs: test
