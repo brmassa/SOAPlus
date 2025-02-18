@@ -1,6 +1,6 @@
 {
     "name": "com.brunomassa.soaplus.core",
-    "version": "2025.02.17",
+    "version": "0.0.1",
     "displayName": "SOAPlus Core",
     "description": "Core framework for ScriptableObject Architecture Pattern (SOAP) in Unity",
     "unity": "2021.3",

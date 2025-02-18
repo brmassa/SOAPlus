@@ -85,7 +85,7 @@ jobs:
                       @semantic-release/exec
                       @semantic-release/git
 
-            - name: Show what would change
+            - name: Show the each package.json
               run: |
                   # Print the version that would be released
                   echo "Would release version: ${{ env.NEXT_RELEASE_VERSION }}"
@@ -93,6 +93,18 @@ jobs:
                   # Show what the package.json files would look like
                   VERSION=${{ env.NEXT_RELEASE_VERSION }}
                   for f in $(find . -name "package.json"); do
+                      echo "Would update $f:"
+                      sed "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" $f
+                  done
+
+            - name: Show the changelogs
+              run: |
+                  # Print the version that would be released
+                  echo "Would release version: ${{ env.NEXT_RELEASE_VERSION }}"
+
+                  # Show what the package.json files would look like
+                  VERSION=${{ env.NEXT_RELEASE_VERSION }}
+                  for f in $(find . -name "CHANGELOG.md"); do
                       echo "Would update $f:"
                       sed "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" $f
                   done
